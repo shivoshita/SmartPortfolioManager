@@ -111,21 +111,28 @@ def import_portfolio():
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Token is invalid'}), 401
 
-    # Check if portfolio data is present in the request
-    if 'portfolioData' not in request.json:
-        return jsonify({'message': 'No portfolio data provided'}), 400
-
-    # Get the portfolio data from the request body
-    portfolio_data = request.json['portfolioData']
+    # Get the base64 file data from the request body
+    request_data = request.get_json()
+    if 'fileData' not in request_data:
+        return jsonify({'message': 'No file data provided'}), 400
 
     try:
-        # Save the portfolio data to the global portfolios dictionary for the specific user
+        # Decode the base64 file content
+        file_content = base64.b64decode(request_data['fileData']).decode('utf-8')
+
+        # Parse the file content (assumed CSV format: symbol,quantity)
+        portfolio_data = []
+        for line in file_content.splitlines():
+            if line.strip():  # Skip empty lines
+                symbol, quantity = line.split(',')
+                portfolio_data.append({'symbol': symbol.strip(), 'quantity': int(quantity)})
+
+        # Save portfolio data for the user
         portfolios[username] = portfolio_data
 
-        # Success response
         return jsonify({'message': 'Portfolio imported successfully'}), 200
     except Exception as e:
-        return jsonify({'message': f'Error processing the portfolio: {str(e)}'}), 500
+        return jsonify({'message': f'Error processing the file: {str(e)}'}), 500
 
 @app.route('/api/get-stock-price', methods=['GET'])
 def get_stock_price():
