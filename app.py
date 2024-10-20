@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import hashlib
@@ -7,6 +6,8 @@ import datetime
 import requests
 from dotenv import load_dotenv
 import os
+import pandas as pd
+from io import BytesIO
 from marshmallow import Schema, fields, validate
 
 load_dotenv()
@@ -55,7 +56,6 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -96,22 +96,44 @@ def login():
 @app.route('/api/import-portfolio', methods=['POST'])
 def import_portfolio():
     auth_header = request.headers.get('Authorization')
+
+    # Check if token exists
     if not auth_header:
         return jsonify({'message': 'Token is missing'}), 401
 
     try:
+        # Extract token from header
         token = auth_header.split(" ")[1]
         data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         username = data['username']
-    except:
+    except jwt.ExpiredSignatureError:
+        return jsonify({'message': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
         return jsonify({'message': 'Token is invalid'}), 401
 
-    portfolio_data = request.get_json().get('data')  # Assume CSV data as a string
+    # Check if a file is present in the request
+    if 'file' not in request.files:
+        return jsonify({'message': 'No file provided'}), 400
 
-    # For simplicity, store the CSV data as is
-    portfolios[username] = portfolio_data
+    file = request.files['file']
 
-    return jsonify({'message': 'Portfolio imported successfully'}), 200
+    # Check if the uploaded file is an Excel file
+    if not file.filename.endswith('.xlsx'):
+        return jsonify({'message': 'Invalid file format, only .xlsx files are supported'}), 400
+
+    try:
+        # Read the Excel file into a DataFrame
+        excel_data = pd.read_excel(file, engine='openpyxl')
+
+        # You can convert this DataFrame into any format you'd like for storage (e.g., CSV, JSON)
+        portfolio_data = excel_data.to_dict(orient='records')
+
+        # Save the portfolio data to a dictionary (or database)
+        portfolios[username] = portfolio_data
+
+        return jsonify({'message': 'Portfolio imported successfully'}), 200
+    except Exception as e:
+        return jsonify({'message': f'Error processing the file: {str(e)}'}), 500
 
 @app.route('/api/get-stock-price', methods=['GET'])
 def get_stock_price():
