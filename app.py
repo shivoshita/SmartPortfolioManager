@@ -95,14 +95,12 @@ def login():
 
 @app.route('/api/import-portfolio', methods=['POST'])
 def import_portfolio():
+    # Authentication: Check if the token is present
     auth_header = request.headers.get('Authorization')
-
-    # Check if token exists
     if not auth_header:
         return jsonify({'message': 'Token is missing'}), 401
 
     try:
-        # Extract token from header
         token = auth_header.split(" ")[1]
         data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         username = data['username']
@@ -111,29 +109,30 @@ def import_portfolio():
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Token is invalid'}), 401
 
-    # Get the base64 file data from the request body
-    request_data = request.get_json()
-    if 'fileData' not in request_data:
-        return jsonify({'message': 'No file data provided'}), 400
+    # Check if portfolio data is in the request
+    if 'portfolioData' not in request.json:
+        return jsonify({'message': 'No portfolio data provided'}), 400
 
-    try:
-        # Decode the base64 file content
-        file_content = base64.b64decode(request_data['fileData']).decode('utf-8')
+    portfolio_data = request.json['portfolioData']
 
-        # Parse the file content (assumed CSV format: symbol,quantity)
-        portfolio_data = []
-        for line in file_content.splitlines():
-            if line.strip():  # Skip empty lines
-                symbol, quantity = line.split(',')
-                portfolio_data.append({'symbol': symbol.strip(), 'quantity': int(quantity)})
+    # Here you can process the portfolio data (e.g., split the file content into stock symbol and quantity)
+    portfolio_lines = portfolio_data.split('\n')
+    portfolio_dict = []
 
-        # Save portfolio data for the user
-        portfolios[username] = portfolio_data
+    for line in portfolio_lines:
+        line = line.strip()
+        if line:  # Ignore empty lines
+            try:
+                symbol, quantity = line.split(',')  # Split by comma
+                portfolio_dict.append({'symbol': symbol.strip(), 'quantity': int(quantity.strip())})
+            except ValueError:
+                return jsonify({'message': f"Invalid format in line: {line}"}), 400
 
-        return jsonify({'message': 'Portfolio imported successfully'}), 200
-    except Exception as e:
-        return jsonify({'message': f'Error processing the file: {str(e)}'}), 500
+    # Save the portfolio data (you can store it in a database or dictionary)
+    portfolios[username] = portfolio_dict
 
+    return jsonify({'message': 'Portfolio imported successfully'}), 200
+    
 @app.route('/api/get-stock-price', methods=['GET'])
 def get_stock_price():
     symbol = request.args.get('symbol')
