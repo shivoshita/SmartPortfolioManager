@@ -111,29 +111,21 @@ def import_portfolio():
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Token is invalid'}), 401
 
-    # Check if a file is present in the request
-    if 'file' not in request.files:
-        return jsonify({'message': 'No file provided'}), 400
+    # Check if portfolio data is present in the request
+    if 'portfolioData' not in request.json:
+        return jsonify({'message': 'No portfolio data provided'}), 400
 
-    file = request.files['file']
-
-    # Check if the uploaded file is an Excel file
-    if not file.filename.endswith('.xlsx'):
-        return jsonify({'message': 'Invalid file format, only .xlsx files are supported'}), 400
+    # Get the portfolio data from the request body
+    portfolio_data = request.json['portfolioData']
 
     try:
-        # Read the Excel file into a DataFrame
-        excel_data = pd.read_excel(file, engine='openpyxl')
-
-        # You can convert this DataFrame into any format you'd like for storage (e.g., CSV, JSON)
-        portfolio_data = excel_data.to_dict(orient='records')
-
-        # Save the portfolio data to a dictionary (or database)
+        # Save the portfolio data to the global portfolios dictionary for the specific user
         portfolios[username] = portfolio_data
 
+        # Success response
         return jsonify({'message': 'Portfolio imported successfully'}), 200
     except Exception as e:
-        return jsonify({'message': f'Error processing the file: {str(e)}'}), 500
+        return jsonify({'message': f'Error processing the portfolio: {str(e)}'}), 500
 
 @app.route('/api/get-stock-price', methods=['GET'])
 def get_stock_price():
