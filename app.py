@@ -166,41 +166,41 @@ def get_portfolio():
 
 @app.route('/api/get-recommendations', methods=['GET'])
 def get_recommendations():
-    # In this case, skip token verification, or adjust it as needed
-    portfolio = [
-        {"symbol": "AAPL", "quantity": 10},
-        {"symbol": "GOOGL", "quantity": 5},
-        {"symbol": "MSFT", "quantity": 8},
-        {"symbol": "AMZN", "quantity": 7},
-        {"symbol": "TSLA", "quantity": 12}
-    ]  # You can replace this with actual portfolio data or from the user's portfolio
-    
-    stock_changes = []
-    
-    # Fetch the stock price and daily change for each symbol
-    for stock in portfolio:
-        symbol = stock['symbol']
-        quantity = stock['quantity']
-        stock_data = get_real_time_price(symbol)  # Use the existing function to fetch real-time price
-        
-        if stock_data:
-            change_percent = float(stock_data.get('10. change percent', '0').strip('%'))
-            price = float(stock_data.get('05. price', '0'))
-            
-            stock_changes.append({
-                'symbol': symbol,
-                'quantity': quantity,
-                'change_percent': change_percent,
-                'price': price
-            })
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return jsonify({'message': 'Token is missing'}), 401
 
-    # Return the top 5 stocks based on daily change percentage
+    try:
+        token = auth_header.split(" ")[1]
+        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        username = data['username']
+    except:
+        return jsonify({'message': 'Token is invalid'}), 401
+
+    portfolio = portfolios.get(username)
+    if not portfolio:
+        return jsonify({'message': 'No portfolio found'}), 404
+
+    # Simple recommendation: Suggest buying stocks with highest increase today
+    # Fetch stock data and rank
+    stock_changes = []
+    for line in portfolio.split('\n')[1:]:  # Skip header
+        if line.strip() == '':
+            continue
+        symbol, quantity = line.split(',')
+        data = get_real_time_price(symbol)
+        if data:
+            change_percent = float(data.get('10. change percent', '0').strip('%'))
+            stock_changes.append({'symbol': symbol, 'change_percent': change_percent})
+
+    # Sort stocks by change_percent descending
     stock_changes.sort(key=lambda x: x['change_percent'], reverse=True)
-    recommendations = stock_changes[:5]  # Get top 5 stocks
+
+    # Recommend top 3 performing stocks
+    recommendations = stock_changes[:3]
 
     return jsonify({'recommendations': recommendations}), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
-
