@@ -166,23 +166,37 @@ def get_portfolio():
 
 @app.route('/api/get-recommendations', methods=['GET'])
 def get_recommendations():
-    # Fetch top stock recommendations based on real-time price data
-    top_stocks = []
-    stock_symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']  # Example stock symbols
+    # In this case, skip token verification, or adjust it as needed
+    portfolio = [
+        {"symbol": "AAPL", "quantity": 10},
+        {"symbol": "GOOGL", "quantity": 5},
+        {"symbol": "MSFT", "quantity": 8},
+        {"symbol": "AMZN", "quantity": 7},
+        {"symbol": "TSLA", "quantity": 12}
+    ]  # You can replace this with actual portfolio data or from the user's portfolio
+    
+    stock_changes = []
+    
+    # Fetch the stock price and daily change for each symbol
+    for stock in portfolio:
+        symbol = stock['symbol']
+        quantity = stock['quantity']
+        stock_data = get_real_time_price(symbol)  # Use the existing function to fetch real-time price
+        
+        if stock_data:
+            change_percent = float(stock_data.get('10. change percent', '0').strip('%'))
+            price = float(stock_data.get('05. price', '0'))
+            
+            stock_changes.append({
+                'symbol': symbol,
+                'quantity': quantity,
+                'change_percent': change_percent,
+                'price': price
+            })
 
-    for symbol in stock_symbols:
-        data = get_real_time_price(symbol)  # Get real-time price for each stock
-        if data:
-            try:
-                change_percent = float(data.get('10. change percent', '0').strip('%'))
-                price = float(data.get('05. price', '0'))  # Get stock price
-                top_stocks.append({'symbol': symbol, 'change_percent': change_percent, 'price': price})
-            except (ValueError, TypeError):
-                continue
-
-    # Sort by highest change_percent and limit to top 5 stocks
-    top_stocks.sort(key=lambda x: x['change_percent'], reverse=True)
-    recommendations = top_stocks[:5]
+    # Return the top 5 stocks based on daily change percentage
+    stock_changes.sort(key=lambda x: x['change_percent'], reverse=True)
+    recommendations = stock_changes[:5]  # Get top 5 stocks
 
     return jsonify({'recommendations': recommendations}), 200
 
