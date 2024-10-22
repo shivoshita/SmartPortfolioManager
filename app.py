@@ -115,7 +115,7 @@ def import_portfolio():
 
     portfolio_data = request.json['portfolioData']
 
-    # Here you can process the portfolio data (e.g., split the file content into stock symbol and quantity)
+    # Here you can process the portfolio data
     portfolio_lines = portfolio_data.split('\n')
     portfolio_dict = []
 
