@@ -188,7 +188,7 @@ def get_recommendations():
         if line.strip() == '':
             continue
         symbol, quantity = line.split(',')
-        data = get_real_time_price(symbol)
+        data = get_stock_price(symbol)
         if data:
             change_percent = float(data.get('10. change percent', '0').strip('%'))
             stock_changes.append({'symbol': symbol, 'change_percent': change_percent})
