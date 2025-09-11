@@ -24,35 +24,35 @@ A comprehensive, modern portfolio management application that helps you track, a
 ## 🖼️ Screenshots
 
 ### Dashboard
-![Dashboard](path/to/image1.png)
+![Dashboard](dashboard-pm.png)
 *Main dashboard showing portfolio overview and key metrics*
 
 ### Portfolio Performance
-![Portfolio Performance](path/to/image2.png)
+![Portfolio Performance](portfolio-performance_pm.png)
 *Track your portfolio growth over time with comparative analysis against S&P 500*
 
 ### Portfolio Management
-![Portfolio](path/to/image3.png)
+![Portfolio](portfolio-pm.png)
 *Detailed view of your investment holdings and performance metrics*
 
 ### Analytics
-![Analytics](path/to/image4.png)
+![Analytics](analytics1_pm.png)
 *Advanced analytics dashboard with risk metrics and performance indicators*
 
 ### Sector Allocation & Monthly Returns
-![Sector Allocation](path/to/image5.png)
+![Sector Allocation](analytics2_pm.png)
 *Sector distribution and monthly performance breakdown*
 
 ### Settings - Account Management
-![Settings](path/to/image6.png)
+![Settings](settings-1.png)
 *Comprehensive settings for account management and notifications*
 
 ### Settings - Display Preferences
-![Display Preferences](path/to/image7.png)
+![Display Preferences](settings2.png)
 *Customizable display preferences and data management options*
 
 ### User Authentication
-![Welcome](path/to/image8.png)
+![Welcome](login.png)
 *Secure login and registration system*
 
 ## 🚀 Getting Started
