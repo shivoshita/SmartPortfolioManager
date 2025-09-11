@@ -197,7 +197,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-- 📧 Email: support@smartportfoliomanager.com
+- 📧 Email: shivoshita@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/shivoshita/SmartPortfolioManager/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/shivoshita/SmartPortfolioManager/discussions)
 
