@@ -55,10 +55,6 @@ A comprehensive, modern portfolio management application that helps you track, a
 ![Welcome](path/to/image8.png)
 *Secure login and registration system*
 
-### CCTView Integration
-![CCTView Settings](path/to/image9.png)
-*Advanced anomaly detection and surveillance configuration*
-
 ## 🚀 Getting Started
 
 ### Prerequisites
